@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Follow-up de Pedidos</title>
+
+<style>
+
+/* FUNDO */
+
+body{
+    margin:0;
+    padding:20px;
+    background:#F4EA00;
+    font-family:Arial;
+}
+
+/* LOGO */
+
+.logo-area{
+    text-align:center;
+    margin-bottom:10px;
+}
+
+.logo{
+    width:260px;
+    max-width:90%;
+}
+
+/* TÍTULO */
+
+h1{
+    text-align:center;
+    color:#000;
+    margin-bottom:20px;
+    font-size:28px;
+    letter-spacing:1px;
+}
+
+/* TOTAL */
+
+.topo-info{
+    display:flex;
+    justify-content:flex-start;
+    margin-bottom:20px;
+}
+
+.total-mini{
+    background:#111;
+    color:white;
+    padding:14px 22px;
+    border-radius:16px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.18);
+    border-left:6px solid #F4EA00;
+}
+
+.texto-total{
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:2px;
+    color:#bdbdbd;
+}
+
+.numero-mini{
+    font-size:34px;
+    font-weight:800;
+    color:#F4EA00;
+    line-height:1;
+}
+
+/* PESQUISA */
+
+input{
+    width:100%;
+    padding:14px;
+    border-radius:12px;
+    border:none;
+    margin-bottom:20px;
+    font-size:15px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* TABELA */
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 5px 20px rgba(0,0,0,0.15);
+}
+
+th{
+    background:#111;
+    color:#F4EA00;
+    padding:14px;
+    text-align:center;
+    font-size:14px;
+}
+
+td{
+    padding:12px;
+    border-bottom:1px solid #ddd;
+    text-align:center;
+    font-size:14px;
+}
+
+tr:hover{
+    background:#f1f1f1;
+}
+
+/* LINHAS */
+
+.alta{
+    background:#ffd6d6 !important;
+}
+
+.finalizado{
+    background:#d4edda !important;
+}
+
+/* STATUS */
+
+.status{
+    padding:6px 12px;
+    border-radius:20px;
+    color:white;
+    font-size:12px;
+    font-weight:bold;
+    display:inline-block;
+    min-width:80px;
+}
+
+.pendente{
+    background:#dc3545;
+}
+
+.andamento{
+    background:#ffc107;
+    color:black;
+}
+
+.ok{
+    background:#28a745;
+}
+
+/* RESPONSIVO */
+
+@media(max-width:900px){
+
+    body{
+        padding:10px;
+    }
+
+    th,td{
+        padding:8px;
+        font-size:12px;
+    }
+
+    .logo{
+        width:180px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- LOGO -->
+
+<div class="logo-area">
+    <img src="logo.png" alt="Logo MAVA" class="logo">
+</div>
+
+<!-- TITULO -->
+
+<h1>FOLLOW-UP DE PEDIDOS</h1>
+
+<!-- TOTAL -->
+
+<div class="topo-info">
+
+    <div class="total-mini">
+
+        <div>
+            <div class="texto-total">
+                TOTAL PEDIDOS
+            </div>
+        </div>
+
+        <div class="numero-mini" id="totalPedidos">
+            0
+        </div>
+
+    </div>
+
+</div>
+
+<!-- PESQUISA -->
+
+<input
+type="text"
+id="pesquisa"
+placeholder="Pesquisar pedido ou cliente">
+
+<!-- TABELA -->
+
+<table>
+
+<thead>
+<tr>
+    <th>N° Pedido</th>
+    <th>Cliente</th>
+    <th>Vendedor</th>
+    <th>Data</th>
+    <th>Lib. Ped.</th>
+    <th>Lib.Fin.</th>
+    <th>Prioridade</th>
+    <th>Montagem</th>
+    <th>Coleta</th>
+</tr>
+</thead>
+
+<tbody id="tabelaPedidos"></tbody>
+
+</table>
+
+<script>
+
+/* ID DA PLANILHA */
+
+const sheetId =
+"17ujaVMyXNO9AS8ZU6tmaJmTW9VoTet_tU0LfLKSGh6w";
+
+/* NOME DA ABA */
+/* TROQUE AQUI CASO NECESSÁRIO */
+
+const sheetName = "Página1";
+
+/* URL */
+
+const sheetURL =
+`https://opensheet.elk.sh/${sheetId}/${sheetName}`;
+
+/* CARREGAR DADOS */
+
+async function carregarDados(){
+
+    try{
+
+        const response = await fetch(
+            sheetURL + "?t=" + Date.now(),
+            {
+                cache:"no-store"
+            }
+        );
+
+        const dados =
+        await response.json();
+
+        console.log(dados);
+
+        const tabela =
+        document.getElementById(
+            "tabelaPedidos"
+        );
+
+        tabela.innerHTML = "";
+
+        dados.forEach(item => {
+
+            const pedido =
+            item["N° Pedido"] || "";
+
+            const cliente =
+            item["Cliente"] || "";
+
+            const vendedor =
+            item["Vendedor"] || "";
+
+            const data =
+            item["Data"] || "";
+
+            const libPed =
+            item["Lib. Ped."] || "";
+
+            const libFin =
+            item["Lib.Fin."] || "";
+
+            const prioridade =
+            item["Prioridade"] || "";
+
+            const montagem =
+            item["Montagem"] || "";
+
+            const coletaStatus =
+            item["Coleta"] || "";
+
+            const tr =
+            document.createElement("tr");
+
+            /* PRIORIDADE */
+
+            if(
+                prioridade.toLowerCase()
+                === "alta"
+            ){
+                tr.classList.add("alta");
+            }
+
+            /* FINALIZADO */
+
+            if(
+                coletaStatus.toLowerCase()
+                === "sim"
+            ){
+                tr.classList.add("finalizado");
+            }
+
+            tr.innerHTML = `
+
+                <td>${pedido}</td>
+
+                <td>${cliente}</td>
+
+                <td>${vendedor}</td>
+
+                <td>${data}</td>
+
+                <!-- LIB PED -->
+
+                <td>
+                    <span class="status ${
+                        libPed.toLowerCase() === "sim" ||
+                        libPed.toLowerCase() === "liberado"
+                        ? "ok"
+                        : "pendente"
+                    }">
+                        ${libPed}
+                    </span>
+                </td>
+
+                <!-- LIB FIN -->
+
+                <td>
+                    <span class="status ${
+                        libFin.toLowerCase() === "sim" ||
+                        libFin.toLowerCase() === "liberado"
+                        ? "ok"
+                        : "pendente"
+                    }">
+                        ${libFin}
+                    </span>
+                </td>
+
+                <!-- PRIORIDADE -->
+
+                <td>
+                    <span class="status ${
+                        prioridade.toLowerCase() === "alta"
+                        ? "pendente"
+                        : "ok"
+                    }">
+                        ${prioridade}
+                    </span>
+                </td>
+
+                <!-- MONTAGEM -->
+
+                <td>
+                    <span class="status ${
+                        montagem.toLowerCase() === "em andamento"
+                        ? "andamento"
+                        : montagem.toLowerCase() === "pendente"
+                        ? "pendente"
+                        : "ok"
+                    }">
+                        ${montagem}
+                    </span>
+                </td>
+
+                <!-- COLETA -->
+
+                <td>
+                    <span class="status ${
+                        coletaStatus.toLowerCase() === "sim"
+                        ? "ok"
+                        : "pendente"
+                    }">
+                        ${coletaStatus}
+                    </span>
+                </td>
+
+            `;
+
+            tabela.appendChild(tr);
+
+        });
+
+        /* TOTAL */
+
+        document.getElementById(
+            "totalPedidos"
+        ).innerText = dados.length;
+
+    }catch(erro){
+
+        console.error(
+            "Erro ao carregar:",
+            erro
+        );
+
+    }
+
+}
+
+/* PESQUISA */
+
+document.getElementById(
+    "pesquisa"
+).addEventListener(
+    "keyup",
+    function(){
+
+        const valor =
+        this.value.toLowerCase();
+
+        const linhas =
+        document.querySelectorAll(
+            "#tabelaPedidos tr"
+        );
+
+        linhas.forEach(linha => {
+
+            linha.style.display =
+            linha.innerText
+            .toLowerCase()
+            .includes(valor)
+            ? ""
+            : "none";
+
+        });
+
+});
+
+/* INICIAR */
+
+carregarDados();
+
+/* AUTO UPDATE */
+
+setInterval(
+    carregarDados,
+    5000
+);
+
+</script>
+
+</body>
+</html>
